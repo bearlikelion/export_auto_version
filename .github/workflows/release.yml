@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  PLUGIN_CFG: addons/export_auto_version/plugin.cfg
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stamp plugin.cfg with the tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          VERSION="${TAG#v}"
+          sed -i -E "s|^version=\".*\"$|version=\"$VERSION\"|" "$PLUGIN_CFG"
+          grep -qx "version=\"$VERSION\"" "$PLUGIN_CFG"
+          cat "$PLUGIN_CFG"
+
+      - name: Build addon zip
+        env:
+          TAG: ${{ github.ref_name }}
+        run: zip -r "export_auto_version-$TAG.zip" addons -x '*.DS_Store'
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "export_auto_version-$TAG.zip" --clobber
+          else
+            gh release create "$TAG" "export_auto_version-$TAG.zip" \
+              --title "$TAG" \
+              --generate-notes
+          fi
