@@ -1,15 +1,16 @@
 # Export Auto Version
 
-Stamps every Godot export with a version: a base you set in Project Settings, plus a git tag.
+![Export Auto Version](logo.png)
 
+Automatically tag every Godot export with an incrementing version number that *you configure*, it updates Godot's `application/config/version` ProjectSetting so anything else reading that property gets the updated version too.
+
+### Example Versioning:
 ```
 0.1   + commit count            ->  0.1.372
 0.1   + commit sha              ->  0.1.a1b2c3d
 v0.1  + commit count + branch   ->  v0.1.372-dev    (on dev)
 v0.1  + commit count + branch   ->  v0.1.372        (on main)
 ```
-
-It writes Godot's own `application/config/version`, so anything already reading that setting picks the release up.
 
 ## Install
 
@@ -20,6 +21,8 @@ Without it the export still runs, falling back to the base version with a warnin
 ## Settings
 
 *Project Settings > Export Auto Version*.
+
+![Project Settings](Screenshots/project_settings.png)
 
 | Setting | Default | Does |
 | --- | --- | --- |
@@ -41,6 +44,7 @@ var release: String = ExportAutoVersion.version()
 ```
 
 Returns the stamp in an exported build, `0.1.dev` in the editor.
+
 `ExportAutoVersion.is_tagged_build()` distinguishes them.
 
 ## Changelog
@@ -62,10 +66,14 @@ Mark (15):
 ## How it works
 
 An `EditorExportPlugin` sets `application/config/version` in `_export_begin`.
+
 The engine writes `project.binary` into the pack from live settings after that callback, so the build carries the stamp while the file on disk is untouched.
+
+![Tools -> print build version](Screenshots/tools_tool.png)
 
 *Export Auto Version: print build version* in the Tools menu prints what the next export would stamp.
 
 ## License
 
 MIT, see `LICENSE`.
+The robot in `logo.png` is the Godot logo by Andrea Calabro, CC BY 4.0.
